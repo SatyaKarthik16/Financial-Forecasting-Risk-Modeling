@@ -28,6 +28,8 @@ financial-forecasting-risk-model/
 ## 📊 Visualizations
 ![credit_risk_confusion_matrix](https://github.com/user-attachments/assets/07d0d45a-0386-4899-afbf-c3cfd6895eb6)
 ![revenue_trend_chart](https://github.com/user-attachments/assets/7d51a42d-a449-4a9e-ba5c-03a6f397739f)
+![image](https://github.com/user-attachments/assets/0d86736e-ccf9-4993-8e4a-5626d62f133a)
+
 
 ## 🧠 Key Learnings
 - Integrated Alteryx workflows for seamless ETL and feature engineering
