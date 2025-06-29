@@ -1,0 +1,12 @@
+import pandas as pd
+
+def load_and_clean_data(filepath):
+    df = pd.read_csv(filepath)
+    df['Date'] = pd.to_datetime(df['Date'])
+    df['Month'] = df['Date'].dt.to_period('M').astype(str)
+    df['CreditScore'] = df['CreditScore'].apply(lambda x: max(min(x, 850), 300))  # Clamp scores
+    return df
+
+if __name__ == "__main__":
+    df = load_and_clean_data("data/synthetic_transactions.csv")
+    print(df.head())

@@ -1,0 +1,22 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+def forecast_revenue(filepath):
+    df = pd.read_csv(filepath)
+    df['Date'] = pd.to_datetime(df['Date'])
+    df['Month'] = df['Date'].dt.to_period('M').astype(str)
+    monthly_revenue = df.groupby('Month')['Amount'].sum().reset_index()
+
+    plt.figure(figsize=(10, 5))
+    sns.lineplot(data=monthly_revenue, x='Month', y='Amount', marker='o')
+    plt.title("Monthly Revenue Trend")
+    plt.xlabel("Month")
+    plt.ylabel("Total Revenue")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig("images/revenue_trend_chart.png")
+    print("Forecast chart saved to images/revenue_trend_chart.png")
+
+if __name__ == "__main__":
+    forecast_revenue("data/synthetic_transactions.csv")
