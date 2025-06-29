@@ -11,9 +11,14 @@ Analyze over 1 million transaction-level financial records to forecast revenue t
 - **Techniques:** Time Series Analysis, Regression Models, Decision Trees, Predictive Modeling
 
 ## 📈 Results
-- Used Python and SQL to clean and transform data, reducing processing time by **30%**
-- Built SAS decision trees and regression models that achieved **92% accuracy** in risk prediction
-- Developed Tableau dashboards to visualize monthly revenue trends and credit risk distribution
+Financial Forecasting & Credit Risk Management System
+
+Engineered and analyzed 1M+ transaction records using Python, SQL, and Alteryx for credit risk assessment and revenue prediction
+Developed decision trees and regression models achieving 92% accuracy in credit risk prediction and monthly revenue forecasting
+Implemented statistical validation techniques and model optimization for enterprise-level risk management
+Applied data mining techniques for pattern analysis across customer transaction behaviors and payment histories
+
+Technologies Used: SQL, Python, SAS, Alteryx, Tableau, BigQuery, Time Series Analysis, Decision Trees, Regression Analysis
 
 ## 🗂️ Project Structure
 ```
