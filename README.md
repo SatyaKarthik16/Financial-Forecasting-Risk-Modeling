@@ -1,28 +1,25 @@
 ﻿# Financial Forecasting and Credit Risk Modeling
 
-End-to-end credit risk assessment and revenue forecasting system for a lending portfolio, built with Python, SQL, and machine learning.
+End-to-end credit risk assessment and revenue forecasting project for a consumer lending portfolio.
 
 ## Problem Statement
 
-Lenders face two linked challenges:
-1. Predicting customer default risk before losses happen.
-2. Forecasting monthly revenue for planning and provisioning.
+Lenders need to solve two connected problems:
+1. Predict customer default risk before losses happen.
+2. Forecast near-term revenue for planning, reserves, and portfolio strategy.
 
-This project provides a complete analytics workflow for both.
+This repository provides a complete workflow that covers ETL, modeling, explainability, risk scoring, forecasting, and business impact reporting.
 
-## Business Value
+## What Makes This Project Complete
 
-- Better default detection through imbalance-aware ML.
-- Explainable risk drivers via SHAP-oriented workflow.
-- Monthly revenue forecasts with uncertainty bands.
-- Customer risk tiers and expected credit loss outputs.
-
-## Key Results
-
-- Multi-model risk pipeline: Logistic Regression, Random Forest, XGBoost
-- SMOTE-based class imbalance handling
-- ARIMA monthly forecasting with holdout error tracking
-- Customer-level probability scoring and portfolio segmentation
+- Data pipeline with validation and feature engineering
+- Imbalance-aware credit risk modeling (SMOTE + class weighting)
+- Multi-model benchmark (Logistic Regression, Random Forest, XGBoost)
+- Proper evaluation metrics for imbalanced data (ROC-AUC and PR-AUC)
+- Customer-level probability scoring and risk tiers
+- Revenue forecasting with ARIMA and confidence intervals
+- Business impact section in notebook (cost-benefit framing)
+- SQL analytics pack for portfolio monitoring and ECL-style analysis
 
 ## Repository Structure
 
@@ -41,9 +38,74 @@ Financial-Forecasting-Risk-Modeling/
 |   |-- risk_scoring.py
 |-- sql/
 |   |-- risk_segmentation.sql
-|-- models/              # generated at runtime
-|-- images/              # generated at runtime
+|-- models/      # generated during runs
+|-- images/      # generated during runs
 ```
+
+## Core Components
+
+### 1) ETL and Feature Engineering
+File: scripts/etl_pipeline.py
+
+- Validates required columns
+- Cleans invalid rows and values
+- Adds engineered features used by models:
+  - AmountLog
+  - IsHighValue
+  - DayOfWeek
+  - PaymentType one-hot features
+
+### 2) Credit Risk Modeling
+File: scripts/risk_model.py
+
+- Trains Logistic Regression, Random Forest, and XGBoost
+- Uses SMOTE for class imbalance
+- Reports ROC-AUC, PR-AUC, and classification report
+- Saves best model to models/credit_risk_model.pkl
+- Writes comparison table to credit_risk_model_report.csv
+
+### 3) Revenue Forecasting
+File: scripts/forecasting.py
+
+- Aggregates to monthly revenue
+- Performs ADF stationarity test
+- Selects ARIMA order via AIC search
+- Evaluates holdout error (MAE, MAPE)
+- Saves forecast to revenue_forecast.csv
+- Saves forecast chart to images/revenue_forecast_arima.png
+
+### 4) Risk Scoring and Segmentation
+File: scripts/risk_scoring.py
+
+- Scores customer default probability using saved model
+- Assigns risk tiers (Low, Medium, High, Very High)
+- Computes expected loss summary
+- Saves:
+  - customer_risk_scores.csv
+  - portfolio_risk_summary.csv
+
+### 5) SQL Analytics
+File: sql/risk_segmentation.sql
+
+Includes six production-style analyses:
+- monthly revenue/default summary
+- customer risk tier segmentation
+- default rate by payment type
+- high-risk watchlist
+- expected credit loss by tier
+- rolling 3-month default trend
+
+## Notebook
+
+File: Financial_Risk_Analysis.ipynb
+
+The notebook includes:
+- EDA and feature analysis
+- model training/evaluation
+- explainability section
+- customer scoring section
+- ARIMA forecast section
+- Section 8: Business Impact Analysis
 
 ## How to Run
 
@@ -54,19 +116,16 @@ python scripts/forecasting.py --data data/synthetic_transactions.csv --horizon 6
 python scripts/risk_scoring.py --data data/synthetic_transactions.csv --model models/credit_risk_model.pkl
 ```
 
-Then run the notebook:
+Then open and run all cells in Financial_Risk_Analysis.ipynb.
 
-- Financial_Risk_Analysis.ipynb
+## Notes on Generated Artifacts
 
-## Outputs
-
-Generated after running scripts:
-- models/credit_risk_model.pkl
-- credit_risk_model_report.csv
-- revenue_forecast.csv
+The following are runtime outputs and are intentionally ignored from version control:
+- models/
+- images/
 - customer_risk_scores.csv
 - portfolio_risk_summary.csv
-- images/*.png
+- revenue_forecast.csv
 
 ## Contact
 
