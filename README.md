@@ -1,46 +1,76 @@
-# 💸 Financial Forecasting & Risk Modeling
+﻿# 💸 Financial Forecasting & Credit Risk Modeling
 
-Forecasting revenue and identifying credit risk patterns using predictive analytics, time series modeling, and statistical analysis.
+> End-to-end credit risk assessment and revenue forecasting system for a consumer lending portfolio built with Python, SQL, and machine learning.
 
-## 🔍 Problem Statement
-Analyze over 1 million transaction-level financial records to forecast revenue trends and assess credit default risk using predictive techniques and machine learning.
+## Problem Statement
 
-## 🧰 Tools & Technologies
-- **Languages:** SQL, Python, SAS
-- **Tools:** Alteryx, Tableau
-- **Techniques:** Time Series Analysis, Regression Models, Decision Trees, Predictive Modeling
+Consumer lending institutions face two interconnected challenges:
 
-## 📈 Results
-Financial Forecasting & Credit Risk Management System
+1. Credit Default Risk: Identifying which customers are likely to default before it happens.
+2. Revenue Forecasting: Projecting future portfolio revenue to support treasury planning and ECL provisioning.
 
-Engineered and analyzed 1M+ transaction records using Python, SQL, and Alteryx for credit risk assessment and revenue prediction
-Developed decision trees and regression models achieving 92% accuracy in credit risk prediction and monthly revenue forecasting
-Implemented statistical validation techniques and model optimization for enterprise-level risk management
-Applied data mining techniques for pattern analysis across customer transaction behaviors and payment histories
+This project delivers a complete analytical system for both using ML and time series methods.
 
-Technologies Used: SQL, Python, SAS, Alteryx, Tableau, BigQuery, Time Series Analysis, Decision Trees, Regression Analysis
+## Business Value
 
-## 🗂️ Project Structure
+| Business Problem | Solution | Impact |
+|---|---|---|
+| Missed defaults | XGBoost + SMOTE | Lower credit loss cost |
+| Explainability requirements | SHAP feature importance | Transparent model behavior |
+| Revenue planning | ARIMA 6-month forecast | Better cash-flow and reserve planning |
+| Portfolio prioritization | Customer risk tiers | Targeted interventions |
+| Provisioning | PD x EAD x LGD | IFRS 9 / CECL style ECL estimates |
+
+## Key Results
+
+- Best model: XGBoost (with SMOTE and class-imbalance handling)
+- ROC-AUC > 0.85 on test set
+- ARIMA forecasting with holdout validation
+- Customer-level risk scoring and expected-loss outputs
+
+## Repository Structure
+
+```text
+Financial-Forecasting-Risk-Modeling/
+|-- Financial_Risk_Analysis.ipynb
+|-- requirements.txt
+|-- scripts/
+|   |-- generate_data.py
+|   |-- etl_pipeline.py
+|   |-- risk_model.py
+|   |-- forecasting.py
+|   |-- risk_scoring.py
+|-- sql/
+|   |-- risk_segmentation.sql
+|-- data/
+|   |-- synthetic_transactions.csv
+|-- models/
+|-- images/
+|-- README.md
 ```
-financial-forecasting-risk-model/
-├── data/                  # Sample raw + processed datasets
-├── notebooks/            # Jupyter + SAS workflow files
-├── scripts/              # Python & SQL scripts for ETL/modeling
-├── images/               # Dashboards and result visuals
-└── README.md             # Project summary
+
+## How to Run
+
+```bash
+pip install -r requirements.txt
+python scripts/risk_model.py --data data/synthetic_transactions.csv
+python scripts/forecasting.py --data data/synthetic_transactions.csv --horizon 6
+python scripts/risk_scoring.py --data data/synthetic_transactions.csv --model models/credit_risk_model.pkl
 ```
 
-## 📊 Visualizations
-![credit_risk_confusion_matrix](https://github.com/user-attachments/assets/07d0d45a-0386-4899-afbf-c3cfd6895eb6)
-![revenue_trend_chart](https://github.com/user-attachments/assets/7d51a42d-a449-4a9e-ba5c-03a6f397739f)
-![image](https://github.com/user-attachments/assets/0d86736e-ccf9-4993-8e4a-5626d62f133a)
+Then open and run all cells in Financial_Risk_Analysis.ipynb.
 
+## SQL Analytics
 
-## 🧠 Key Learnings
-- Integrated Alteryx workflows for seamless ETL and feature engineering
-- Gained practical exposure to financial risk indicators and regulatory data
-- Combined domain knowledge with statistical models to support decision-making
+See sql/risk_segmentation.sql for:
+- Monthly revenue/default summaries
+- Risk-tier segmentation
+- Payment-channel risk analysis
+- High-risk watchlist
+- ECL estimates
+- Rolling default trends
 
-## 📬 Contact
-For feedback or collaboration:
-- ✉ Email: [satyakarthik.y@gmail.com](mailto:satyakarthik.y@gmail.com)
+## Contact
+
+Satya Karthik  
+satyakarthik.y@gmail.com
