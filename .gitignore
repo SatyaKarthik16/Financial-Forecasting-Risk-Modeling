@@ -10,7 +10,6 @@ env/
 
 # Model and run artifacts
 models/
-images/
 customer_risk_scores.csv
 portfolio_risk_summary.csv
 revenue_forecast.csv
