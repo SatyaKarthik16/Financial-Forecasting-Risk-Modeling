@@ -4,6 +4,159 @@ End-to-end credit risk assessment and revenue forecasting project for a consumer
 
 ## Overview
 
+This project addresses two connected goals:
+1. Predict customer default risk before losses occur.
+2. Forecast near-term revenue for planning and portfolio decisions.
+
+The workflow includes ETL, feature engineering, model benchmarking, explainability, customer risk scoring, ARIMA forecasting, and business impact reporting.
+
+## Key Features
+
+- Data validation and feature engineering pipeline
+- Imbalance-aware credit modeling with SMOTE
+- Benchmark models: Logistic Regression, Random Forest, XGBoost
+- Evaluation focused on ROC-AUC and PR-AUC
+- Explainability artifact generation
+- Customer-level risk tiering and expected loss rollups
+- ARIMA forecasting with confidence intervals
+- Business impact visualization
+- SQL analytics pack for portfolio monitoring
+
+## Repository Structure
+
+```text
+Financial-Forecasting-Risk-Modeling/
+|-- Financial_Risk_Analysis.ipynb
+|-- README.md
+|-- LICENSE
+|-- requirements.txt
+|-- data/
+|   |-- synthetic_transactions.csv
+|-- scripts/
+|   |-- generate_data.py
+|   |-- etl_pipeline.py
+|   |-- risk_model.py
+|   |-- forecasting.py
+|   |-- risk_scoring.py
+|-- sql/
+|   |-- risk_segmentation.sql
+|-- models/      # generated during runs
+|-- images/      # generated during runs
+```
+
+## Visual Results
+
+### Model Evaluation
+![Confusion Matrices](images/confusion_matrices.png)
+![ROC and PR Curves](images/roc_pr_curves.png)
+
+### Explainability
+![Feature Importance / SHAP](images/shap_feature_importance.png)
+
+### Forecasting
+![ARIMA Revenue Forecast](images/revenue_forecast_arima.png)
+
+### Risk Dashboard
+![Portfolio Risk Dashboard](images/portfolio_risk_dashboard.png)
+
+### Business Impact
+![Business Impact](images/business_impact.png)
+
+## Core Components
+
+### ETL and Feature Engineering
+File: scripts/etl_pipeline.py
+
+- Validates required schema
+- Cleans invalid rows and values
+- Engineers model features
+
+### Credit Risk Modeling
+File: scripts/risk_model.py
+
+- Trains and compares benchmark models
+- Saves best model to models/credit_risk_model.pkl
+- Exports metrics to credit_risk_model_report.csv
+- Generates evaluation and explainability visuals in images/
+
+### Revenue Forecasting
+File: scripts/forecasting.py
+
+- Builds monthly revenue series
+- Selects ARIMA order with AIC
+- Exports revenue_forecast.csv and forecast image
+
+### Risk Scoring and Segmentation
+File: scripts/risk_scoring.py
+
+- Scores probability of default
+- Assigns customer risk tiers
+- Exports customer_risk_scores.csv and portfolio_risk_summary.csv
+
+### SQL Analytics
+File: sql/risk_segmentation.sql
+
+Contains six production-style analyses for risk segmentation and trend monitoring.
+
+## Notebook
+
+File: Financial_Risk_Analysis.ipynb
+
+The notebook mirrors the scripted pipeline and includes EDA, modeling, explainability, scoring, forecasting, and business impact analysis.
+
+## How To Run
+
+1) Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+2) (Optional) regenerate data
+
+```bash
+python scripts/generate_data.py --rows 10000 --customers 2000 --seed 42 --output data/synthetic_transactions.csv
+```
+
+3) Train models and create model artifacts
+
+```bash
+python scripts/risk_model.py --data data/synthetic_transactions.csv
+```
+
+4) Run forecasting
+
+```bash
+python scripts/forecasting.py --data data/synthetic_transactions.csv --horizon 6
+```
+
+5) Run risk scoring
+
+```bash
+python scripts/risk_scoring.py --data data/synthetic_transactions.csv --model models/credit_risk_model.pkl
+```
+
+6) Run all notebook cells in Financial_Risk_Analysis.ipynb
+
+## Notes
+
+Generated runtime artifacts are typically excluded from version control:
+- models/
+- images/
+- customer_risk_scores.csv
+- portfolio_risk_summary.csv
+- revenue_forecast.csv
+
+## Contact
+
+Satya Karthik  
+satyakarthik.y@gmail.com
+# Financial Forecasting and Credit Risk Modeling
+
+End-to-end credit risk assessment and revenue forecasting project for a consumer lending portfolio.
+
+## Overview
+
 This project solves two connected business problems:
 1. Predict customer default risk before losses happen.
 2. Forecast near-term revenue for planning, reserves, and portfolio strategy.
