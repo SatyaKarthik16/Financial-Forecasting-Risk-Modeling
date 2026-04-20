@@ -1,65 +1,100 @@
-﻿import argparse, os, warnings, itertools
+﻿"""
+Revenue forecasting using ARIMA with holdout evaluation and confidence intervals.
+"""
+
+import argparse
+import itertools
+import os
+import warnings
+
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-import numpy as np, pandas as pd
+import numpy as np
+import pandas as pd
 from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.tsa.stattools import adfuller
+
 warnings.filterwarnings("ignore")
 os.makedirs("images", exist_ok=True)
 
-def load_monthly_revenue(filepath):
-    df = pd.read_csv(filepath, parse_dates=["Date"])
-    monthly = df.groupby(df["Date"].dt.to_period("M"))["Amount"].sum()
-    monthly.index = monthly.index.to_timestamp()
-    monthly.name = "Revenue"
-    return monthly
 
-def main(filepath, horizon=6):
-    series = load_monthly_revenue(filepath)
-    print(f"[Forecasting] {len(series)} months: {series.index[0].strftime('%b %Y')} to {series.index[-1].strftime('%b %Y')}")
-    p_val = adfuller(series)[1]
-    d = 0 if p_val < 0.05 else 1
-    print(f"[Forecasting] ADF p={p_val:.4f} -> d={d}")
-    best_aic, best_order = np.inf, (1, d, 1)
+def load_monthly(filepath: str) -> pd.Series:
+    df = pd.read_csv(filepath, parse_dates=["Date"])
+    s = df.groupby(df["Date"].dt.to_period("M"))["Amount"].sum()
+    s.index = s.index.to_timestamp()
+    s.name = "Revenue"
+    return s
+
+
+def select_order(series: pd.Series, d: int):
+    best_aic = np.inf
+    best = (1, d, 1)
     for p, q in itertools.product(range(4), range(4)):
         try:
-            res = ARIMA(series, order=(p,d,q)).fit()
+            res = ARIMA(series, order=(p, d, q)).fit()
             if res.aic < best_aic:
-                best_aic, best_order = res.aic, (p,d,q)
-        except: continue
-    print(f"[Forecasting] Best ARIMA{best_order} AIC={best_aic:.2f}")
-    holdout = min(6, len(series)//4)
+                best_aic = res.aic
+                best = (p, d, q)
+        except Exception:
+            continue
+    return best, best_aic
+
+
+def main(filepath: str, horizon: int):
+    series = load_monthly(filepath)
+    print(f"[Forecasting] Monthly series: {len(series)} periods")
+
+    pval = adfuller(series.dropna())[1]
+    d = 0 if pval < 0.05 else 1
+    print(f"[Forecasting] ADF p-value={pval:.4f}, using d={d}")
+
+    order, aic = select_order(series, d)
+    print(f"[Forecasting] Best ARIMA{order} with AIC={aic:.2f}")
+
+    holdout = min(6, max(3, len(series) // 4))
     train, test = series.iloc[:-holdout], series.iloc[-holdout:]
-    ho_fc = ARIMA(train, order=best_order).fit().forecast(steps=holdout)
-    ho_fc.index = test.index
-    mae  = np.mean(np.abs(test.values - ho_fc.values))
-    mape = np.mean(np.abs((test.values - ho_fc.values)/test.values))*100
-    print(f"[Forecasting] Hold-out MAE=${mae:,.2f}  MAPE={mape:.2f}%")
-    fitted = ARIMA(series, order=best_order).fit()
-    fc_result = fitted.get_forecast(steps=horizon)
-    fc_mean = fc_result.predicted_mean
-    conf_int = fc_result.conf_int(alpha=0.05)
-    future_idx = pd.date_range(start=series.index[-1]+pd.DateOffset(months=1), periods=horizon, freq="MS")
-    fc_mean.index = conf_int.index = future_idx
-    fig, ax = plt.subplots(figsize=(14,6))
-    ax.plot(series.index, series.values/1e6, color="#1f77b4", linewidth=2, marker="o", markersize=3, label="Historical")
-    ax.plot(fc_mean.index, fc_mean.values/1e6, color="#2ca02c", linewidth=2.5, marker="D", markersize=6, label="Forecast")
-    ax.fill_between(fc_mean.index, conf_int.iloc[:,0]/1e6, conf_int.iloc[:,1]/1e6, alpha=0.2, color="#2ca02c", label="95% CI")
-    ax.axvline(fc_mean.index[0], color="grey", linestyle="--", alpha=0.6)
-    ax.set_title(f"Monthly Revenue — ARIMA{best_order} Forecast", fontsize=14, fontweight="bold")
-    ax.set_xlabel("Month"); ax.set_ylabel("Revenue ($M)"); ax.legend()
-    plt.xticks(rotation=45); plt.tight_layout()
+    hmodel = ARIMA(train, order=order).fit()
+    hpred = hmodel.forecast(steps=holdout)
+    hpred.index = test.index
+
+    mae = np.mean(np.abs(test.values - hpred.values))
+    mape = np.mean(np.abs((test.values - hpred.values) / test.values)) * 100
+    print(f"[Forecasting] Holdout MAE=${mae:,.2f}, MAPE={mape:.2f}%")
+
+    model = ARIMA(series, order=order).fit()
+    out = model.get_forecast(steps=horizon)
+    mean = out.predicted_mean
+    ci = out.conf_int(alpha=0.05)
+
+    future_index = pd.date_range(start=series.index[-1] + pd.DateOffset(months=1), periods=horizon, freq="MS")
+    mean.index = future_index
+    ci.index = future_index
+
+    fig, ax = plt.subplots(figsize=(12, 5))
+    ax.plot(series.index, series.values, label="Historical", color="#1f77b4")
+    ax.plot(mean.index, mean.values, label="Forecast", color="#2ca02c")
+    ax.fill_between(mean.index, ci.iloc[:, 0], ci.iloc[:, 1], alpha=0.2, color="#2ca02c", label="95% CI")
+    ax.legend()
+    ax.set_title(f"Revenue Forecast ARIMA{order}")
+    ax.set_xlabel("Month")
+    ax.set_ylabel("Revenue")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
     plt.savefig("images/revenue_forecast_arima.png", dpi=150)
-    plt.show()
-    tbl = pd.DataFrame({"Month":fc_mean.index.strftime("%b %Y"),"Forecast($M)":(fc_mean/1e6).round(3).values,
-        "Lower CI($M)":(conf_int.iloc[:,0]/1e6).round(3).values,"Upper CI($M)":(conf_int.iloc[:,1]/1e6).round(3).values})
+    plt.close()
+
+    tbl = pd.DataFrame({
+        "Month": mean.index.strftime("%b %Y"),
+        "Forecast": mean.round(2).values,
+        "Lower95": ci.iloc[:, 0].round(2).values,
+        "Upper95": ci.iloc[:, 1].round(2).values,
+    })
     tbl.to_csv("revenue_forecast.csv", index=False)
-    print("[Forecasting] Saved revenue_forecast.csv and images/revenue_forecast_arima.png")
-    print(tbl.to_string(index=False))
+    print("Saved revenue_forecast.csv and images/revenue_forecast_arima.png")
+
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--data", default="data/synthetic_transactions.csv")
-    parser.add_argument("--horizon", type=int, default=6)
-    args = parser.parse_args()
-    main(args.data, args.horizon)
+    p = argparse.ArgumentParser()
+    p.add_argument("--data", default="data/synthetic_transactions.csv")
+    p.add_argument("--horizon", type=int, default=6)
+    a = p.parse_args()
+    main(a.data, a.horizon)
