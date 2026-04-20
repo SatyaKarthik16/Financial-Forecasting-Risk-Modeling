@@ -9,6 +9,7 @@ import sys
 import joblib
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 FEATURE_COLS = [
     "Amount", "AmountLog", "CreditScore", "IsHighValue", "DayOfWeek",
@@ -58,25 +59,38 @@ def main(data_path: str, model_path: str):
     cust["risk_tier"] = cust["max_default_prob"].apply(assign_tier)
     cust["expected_loss"] = (cust["avg_default_prob"] * cust["total_exposure"] * LGD).round(2)
 
-    summary = cust.groupby("risk_tier").agg(
+    tier_order = ["Low Risk", "Medium Risk", "High Risk", "Very High Risk"]
+    cust["risk_tier"] = pd.Categorical(cust["risk_tier"], categories=tier_order, ordered=True)
+
+    summary = cust.groupby("risk_tier", observed=False).agg(
         customer_count=("CustomerID", "count"),
         total_exposure=("total_exposure", "sum"),
         avg_default_prob=("avg_default_prob", "mean"),
         total_expected_loss=("expected_loss", "sum"),
-    ).reset_index()
+    ).reset_index().sort_values("risk_tier")
 
     cust.to_csv("customer_risk_scores.csv", index=False)
     summary.to_csv("portfolio_risk_summary.csv", index=False)
 
-    plt.figure(figsize=(9, 4))
-    summary.set_index("risk_tier")["total_expected_loss"].sort_values(ascending=False).plot(kind="bar", color="#1f77b4")
-    plt.title("Expected Credit Loss by Risk Tier")
-    plt.ylabel("Expected Loss")
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+    sns.barplot(data=summary, x="risk_tier", y="customer_count", color="#4c78a8", ax=axes[0])
+    axes[0].set_title("Customers by Risk Tier")
+    axes[0].set_xlabel("Risk Tier")
+    axes[0].set_ylabel("Customer Count")
+    axes[0].tick_params(axis="x", rotation=20)
+
+    sns.barplot(data=summary, x="risk_tier", y="total_expected_loss", color="#f58518", ax=axes[1])
+    axes[1].set_title("Expected Credit Loss by Tier")
+    axes[1].set_xlabel("Risk Tier")
+    axes[1].set_ylabel("Expected Loss")
+    axes[1].tick_params(axis="x", rotation=20)
+
+    plt.suptitle("Portfolio Risk Dashboard", fontsize=12)
     plt.tight_layout()
-    plt.savefig("images/expected_loss_by_tier.png", dpi=140)
+    plt.savefig("images/portfolio_risk_dashboard.png", dpi=150)
     plt.close()
 
-    print("Saved customer_risk_scores.csv, portfolio_risk_summary.csv, and images/expected_loss_by_tier.png")
+    print("Saved customer_risk_scores.csv, portfolio_risk_summary.csv, and images/portfolio_risk_dashboard.png")
 
 
 if __name__ == "__main__":

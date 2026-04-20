@@ -42,6 +42,8 @@ def select_order(series: pd.Series, d: int):
 def main(filepath: str, horizon: int):
     series = load_monthly(filepath)
     print(f"[Forecasting] Monthly series: {len(series)} periods")
+    if len(series) < 10:
+        raise ValueError("[Forecasting] Need at least 10 monthly observations for stable holdout validation.")
 
     pval = adfuller(series.dropna())[1]
     d = 0 if pval < 0.05 else 1
@@ -57,7 +59,8 @@ def main(filepath: str, horizon: int):
     hpred.index = test.index
 
     mae = np.mean(np.abs(test.values - hpred.values))
-    mape = np.mean(np.abs((test.values - hpred.values) / test.values)) * 100
+    denominator = np.where(test.values == 0, 1.0, test.values)
+    mape = np.mean(np.abs((test.values - hpred.values) / denominator)) * 100
     print(f"[Forecasting] Holdout MAE=${mae:,.2f}, MAPE={mape:.2f}%")
 
     model = ARIMA(series, order=order).fit()
