@@ -2,6 +2,182 @@
 
 End-to-end credit risk assessment and revenue forecasting project for a consumer lending portfolio.
 
+## Overview
+
+This project solves two connected business problems:
+1. Predict customer default risk before losses happen.
+2. Forecast near-term revenue for planning, reserves, and portfolio strategy.
+
+The repository includes a complete workflow for ETL, feature engineering, model training, explainability, customer risk scoring, ARIMA forecasting, and business impact reporting.
+
+## Key Features
+
+- Data pipeline with validation and feature engineering
+- Imbalance-aware credit risk modeling using SMOTE
+- Multi-model benchmark: Logistic Regression, Random Forest, XGBoost
+- Evaluation with ROC-AUC and PR-AUC for imbalanced classes
+- Model explainability image generation
+- Customer-level probability scoring and risk tiers
+- Revenue forecasting with ARIMA and confidence intervals
+- Business impact artifact for model-vs-baseline comparison
+- SQL analytics pack for portfolio segmentation and monitoring
+
+## Repository Structure
+
+```text
+Financial-Forecasting-Risk-Modeling/
+|-- Financial_Risk_Analysis.ipynb
+|-- README.md
+|-- LICENSE
+|-- requirements.txt
+|-- data/
+|   |-- synthetic_transactions.csv
+|-- scripts/
+|   |-- generate_data.py
+|   |-- etl_pipeline.py
+|   |-- risk_model.py
+|   |-- forecasting.py
+|   |-- risk_scoring.py
+|-- sql/
+|   |-- risk_segmentation.sql
+|-- models/      # generated during runs
+|-- images/      # generated during runs
+```
+
+## Visual Results
+
+### Model Evaluation
+![Confusion Matrices](images/confusion_matrices.png)
+![ROC and PR Curves](images/roc_pr_curves.png)
+
+### Explainability
+![Feature Importance / SHAP](images/shap_feature_importance.png)
+
+### Forecasting
+![ARIMA Revenue Forecast](images/revenue_forecast_arima.png)
+
+### Risk Portfolio Dashboard
+![Portfolio Risk Dashboard](images/portfolio_risk_dashboard.png)
+
+### Business Impact
+![Business Impact](images/business_impact.png)
+
+## Core Components
+
+### ETL and Feature Engineering
+File: scripts/etl_pipeline.py
+
+- Validates required schema
+- Cleans invalid rows and values
+- Engineers model features:
+  - AmountLog
+  - IsHighValue
+  - DayOfWeek
+  - PaymentType one-hot features
+
+### Credit Risk Modeling
+File: scripts/risk_model.py
+
+- Trains Logistic Regression, Random Forest, and XGBoost
+- Handles imbalance with SMOTE
+- Saves best model to models/credit_risk_model.pkl
+- Exports metrics to credit_risk_model_report.csv
+- Exports model visuals to images/
+
+### Revenue Forecasting
+File: scripts/forecasting.py
+
+- Aggregates monthly revenue
+- Runs ADF stationarity check
+- Selects ARIMA order via AIC search
+- Evaluates holdout MAE and MAPE
+- Exports revenue_forecast.csv and forecast chart
+
+### Risk Scoring and Segmentation
+File: scripts/risk_scoring.py
+
+- Scores default probability per transaction
+- Aggregates to customer level
+- Assigns risk tiers: Low, Medium, High, Very High
+- Exports:
+  - customer_risk_scores.csv
+  - portfolio_risk_summary.csv
+  - images/portfolio_risk_dashboard.png
+
+### SQL Analytics
+File: sql/risk_segmentation.sql
+
+Includes six production-style analyses:
+- Monthly revenue and default summary
+- Customer risk-tier segmentation
+- Default rate by payment type
+- High-risk watchlist
+- Expected credit loss by tier
+- Rolling 3-month default trend
+
+## Notebook
+
+File: Financial_Risk_Analysis.ipynb
+
+The notebook mirrors the scripted pipeline and includes:
+- EDA and feature analysis
+- Model training and evaluation
+- Explainability section
+- Customer scoring section
+- ARIMA forecast section
+- Business impact analysis
+
+## How To Run
+
+1) Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+2) Generate data (optional)
+
+```bash
+python scripts/generate_data.py --rows 10000 --customers 2000 --seed 42 --output data/synthetic_transactions.csv
+```
+
+3) Train models and generate model artifacts
+
+```bash
+python scripts/risk_model.py --data data/synthetic_transactions.csv
+```
+
+4) Run forecasting
+
+```bash
+python scripts/forecasting.py --data data/synthetic_transactions.csv --horizon 6
+```
+
+5) Run customer scoring
+
+```bash
+python scripts/risk_scoring.py --data data/synthetic_transactions.csv --model models/credit_risk_model.pkl
+```
+
+6) Open Financial_Risk_Analysis.ipynb and run all cells
+
+## Notes
+
+The following are generated runtime artifacts and are typically ignored in version control:
+- models/
+- images/
+- customer_risk_scores.csv
+- portfolio_risk_summary.csv
+- revenue_forecast.csv
+
+## Contact
+
+Satya Karthik  
+satyakarthik.y@gmail.com
+# Financial Forecasting and Credit Risk Modeling
+
+End-to-end credit risk assessment and revenue forecasting project for a consumer lending portfolio.
+
 ## Problem Statement
 
 Lenders need to solve two connected problems:
